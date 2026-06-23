@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Index of /production/drops</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      border-radius: 0 !important;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --dim: #888888;
+      --border: #333333;
+      --active: #ffffff;
+      --track-bg: #1a1a1a;
+      --track-fill: #ffffff;
+    }
+
+    html, body {
+      background: var(--black);
+      color: var(--white);
+      font-family: -apple-system, BlinkMacSystemFont, 'Arial', 'Helvetica', sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    body {
+      padding: 32px 24px 64px;
+      max-width: 900px;
+    }
+
+    /* ── HEADER ── */
+    .dir-header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 4px;
+    }
+
+    .dir-header h1 {
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    .dir-header h1 span {
+      color: var(--dim);
+    }
+
+    /* ── TABLE ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    thead tr {
+      border-bottom: 1px solid var(--border);
+    }
+
+    thead th {
+      text-align: left;
+      padding: 6px 8px 6px 0;
+      color: var(--dim);
+      font-weight: 400;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      user-select: none;
+    }
+
+    thead th:nth-child(1) { width: 46%; }
+    thead th:nth-child(2) { width: 18%; }
+    thead th:nth-child(3) { width: 14%; }
+    thead th:nth-child(4) { width: 22%; }
+
+    tbody tr.file-row {
+      border-bottom: 1px solid #111111;
+      cursor: pointer;
+      transition: background 0.05s;
+    }
+
+    tbody tr.file-row:hover {
+      background: #0d0d0d;
+    }
+
+    tbody tr.file-row.active {
+      background: #0d0d0d;
+    }
+
+    tbody td {
+      padding: 9px 8px 9px 0;
+      vertical-align: top;
+    }
+
+    .file-icon {
+      color: var(--dim);
+      margin-right: 6px;
+      font-style: normal;
+    }
+
+    .file-name {
+      font-size: 13px;
+      word-break: break-all;
+    }
+
+    .file-name .ext {
+      color: var(--dim);
+    }
+
+    .file-date {
+      color: var(--dim);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .file-size {
+      color: var(--dim);
+      font-size: 12px;
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-stream, .btn-dl {
+      font-family: inherit;
+      font-size: 11px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--white);
+      padding: 3px 10px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: border-color 0.1s, color 0.1s;
+      white-space: nowrap;
+    }
+
+    .btn-stream:hover, .btn-dl:hover {
+      border-color: var(--white);
+    }
+
+    .btn-stream.playing {
+      border-color: var(--white);
+      background: var(--white);
+      color: var(--black);
+    }
+
+    /* ── PLAYER TRAY ── */
+    tr.player-tray {
+      display: none;
+    }
+
+    tr.player-tray.open {
+      display: table-row;
+    }
+
+    tr.player-tray td {
+      padding: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tray-inner {
+      padding: 14px 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tray-meta {
+      font-size: 11px;
+      color: var(--dim);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .tray-meta strong {
+      color: var(--white);
+      font-weight: 500;
+    }
+
+    /* ── PROGRESS ── */
+    .progress-wrap {
+      position: relative;
+      height: 3px;
+      background: var(--track-bg);
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--track-fill);
+      width: 0%;
+      pointer-events: none;
+      transition: width 0.1s linear;
+    }
+
+    .progress-wrap:hover .progress-fill {
+      background: #cccccc;
+    }
+
+    /* ── CONTROLS ── */
+    .tray-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .ctrl-btn {
+      background: none;
+      border: none;
+      color: var(--white);
+      font-family: inherit;
+      font-size: 11px;
+      cursor: pointer;
+      padding: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.7;
+      transition: opacity 0.1s;
+    }
+
+    .ctrl-btn:hover { opacity: 1; }
+
+    .time-display {
+      font-size: 11px;
+      color: var(--dim);
+      letter-spacing: 0.05em;
+      font-variant-numeric: tabular-nums;
+      margin-left: auto;
+    }
+
+    /* ── FOOTER ── */
+    .dir-footer {
+      margin-top: 24px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      color: var(--dim);
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+
+    @media (max-width: 600px) {
+      body { padding: 20px 14px 48px; }
+      thead th:nth-child(2),
+      tbody td:nth-child(2) { display: none; }
+      thead th:nth-child(1) { width: 55%; }
+      thead th:nth-child(3) { width: 15%; }
+      thead th:nth-child(4) { width: 30%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dir-header">
+    <h1>Index of <span>/production/drops</span></h1>
+  </div>
+
+  <table id="fileTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Modified</th>
+        <th>Size</th>
+        <th>Options</th>
+      </tr>
+    </thead>
+    <tbody id="fileList">
+      <!-- rows injected by JS -->
+    </tbody>
+  </table>
+
+  <div class="dir-footer">
+    <span id="footerCount">— files</span>
+    <span>Apache/2.4 Server</span>
+  </div>
+
+  <!-- HIDDEN AUDIO ENGINE -->
+  <audio id="audioEngine" preload="none"></audio>
+
+<script>
+  /* ─────────────────────────────────────────────
+     TRACK MANIFEST
+     Replace src URLs with your actual CDN/IPFS links.
+     Format:  { name, ext, date, size, src }
+  ───────────────────────────────────────────── */
+  const TRACKS = [
+    {
+      name: "totaldramarama 140bpmmm",
+      ext: ".mp3",
+      date: "2026-06-23 00:00",
+      size: "— MB",
+      src: "audio/totaldramarama 140bpmmm.mp3"
+    },
+    {
+      name: "runaway 130bpmmm",
+      ext: ".mp3",
+      date: "2026-06-23 00:00",
+      size: "— MB",
+      src: "audio/runaway 130bpmmm.mp3"
+    },
+    {
+      name: "ill 140bpmmm",
+      ext: ".mp3",
+      date: "2026-06-23 00:00",
+      size: "— MB",
+      src: "audio/ill 140bpmmm.mp3"
+    },
+    {
+      name: "skai 90bpmm",
+      ext: ".mp3",
+      date: "2026-06-23 00:00",
+      size: "— MB",
+      src: "audio/skai 90bpmm.mp3"
+    }
+  ];
+
+  /* ─────────────────────────────────────────────
+     STATE
+  ───────────────────────────────────────────── */
+  const audio   = document.getElementById('audioEngine');
+  let activeIdx = null;   // currently open tray index
+
+  /* ─────────────────────────────────────────────
+     BUILD TABLE
+  ───────────────────────────────────────────── */
+  const tbody = document.getElementById('fileList');
+
+  TRACKS.forEach((track, i) => {
+    /* FILE ROW */
+    const fileRow = document.createElement('tr');
+    fileRow.className = 'file-row';
+    fileRow.dataset.idx = i;
+    fileRow.innerHTML = `
+      <td>
+        <i class="file-icon">[snd]</i>
+        <span class="file-name">${track.name}<span class="ext">${track.ext}</span></span>
+      </td>
+      <td class="file-date">${track.date}</td>
+      <td class="file-size">${track.size}</td>
+      <td class="file-actions">
+        <button class="btn-stream" data-idx="${i}">▶ Stream</button>
+        <button class="btn-dl"    data-idx="${i}">↓ DL</button>
+      </td>
+    `;
+
+    /* PLAYER TRAY ROW */
+    const trayRow = document.createElement('tr');
+    trayRow.className = 'player-tray';
+    trayRow.id = `tray-${i}`;
+    trayRow.innerHTML = `
+      <td colspan="4">
+        <div class="tray-inner">
+          <div class="tray-meta">Now streaming — <strong>${track.name}${track.ext}</strong></div>
+          <div class="progress-wrap" id="progress-wrap-${i}">
+            <div class="progress-fill" id="progress-fill-${i}"></div>
+          </div>
+          <div class="tray-controls">
+            <button class="ctrl-btn" id="playpause-${i}">PAUSE</button>
+            <button class="ctrl-btn" id="restart-${i}">RESTART</button>
+            <span class="time-display" id="time-${i}">0:00 / 0:00</span>
+          </div>
+        </div>
+      </td>
+    `;
+
+    tbody.appendChild(fileRow);
+    tbody.appendChild(trayRow);
+  });
+
+  document.getElementById('footerCount').textContent =
+    `${TRACKS.length} file${TRACKS.length !== 1 ? 's' : ''}`;
+
+  /* ─────────────────────────────────────────────
+     HELPERS
+  ───────────────────────────────────────────── */
+  function fmtTime(s) {
+    if (!s || isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = String(Math.floor(s % 60)).padStart(2, '0');
+    return `${m}:${sec}`;
+  }
+
+  function closeTray(idx) {
+    if (idx === null) return;
+    document.getElementById(`tray-${idx}`).classList.remove('open');
+    const rows = document.querySelectorAll('.file-row');
+    rows[idx * 2 / 2]?.classList.remove('active');     // every other row
+    document.querySelectorAll('.file-row')[idx].classList.remove('active');
+    document.querySelectorAll('.btn-stream')[idx].classList.remove('playing');
+    document.querySelectorAll('.btn-stream')[idx].textContent = '▶ Stream';
+  }
+
+  function openTray(idx) {
+    document.getElementById(`tray-${idx}`).classList.add('open');
+    document.querySelectorAll('.file-row')[idx].classList.add('active');
+    document.querySelectorAll('.btn-stream')[idx].classList.add('playing');
+    document.querySelectorAll('.btn-stream')[idx].textContent = '■ Stop';
+  }
+
+  /* ─────────────────────────────────────────────
+     STREAM ACTION
+  ───────────────────────────────────────────── */
+  function streamTrack(idx) {
+    const track = TRACKS[idx];
+
+    // Same track toggled → full stop + collapse tray
+    if (activeIdx === idx) {
+      audio.pause();
+      audio.currentTime = 0;
+      closeTray(idx);
+      activeIdx = null;
+      return;
+    }
+
+    // Different track → close old, open new
+    closeTray(activeIdx);
+    audio.pause();
+
+    activeIdx = idx;
+    openTray(idx);
+
+    audio.src = track.src;
+    audio.load();
+    audio.play().catch(() => {});
+
+    document.getElementById(`playpause-${idx}`).textContent = 'PAUSE';
+    logTelemetry('STREAM', track.name + track.ext);
+  }
+
+  /* ─────────────────────────────────────────────
+     DOWNLOAD ACTION
+  ───────────────────────────────────────────── */
+  function downloadTrack(idx) {
+    const track = TRACKS[idx];
+    const a = document.createElement('a');
+    a.href = track.src;
+    a.download = track.name + track.ext;
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    logTelemetry('DOWNLOAD', track.name + track.ext);
+  }
+
+  /* ─────────────────────────────────────────────
+     AUDIO EVENTS → UI SYNC
+  ───────────────────────────────────────────── */
+  audio.addEventListener('timeupdate', () => {
+    if (activeIdx === null) return;
+    const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+    const fill = document.getElementById(`progress-fill-${activeIdx}`);
+    const time = document.getElementById(`time-${activeIdx}`);
+    if (fill) fill.style.width = pct + '%';
+    if (time) time.textContent = `${fmtTime(audio.currentTime)} / ${fmtTime(audio.duration)}`;
+  });
+
+  audio.addEventListener('ended', () => {
+    if (activeIdx === null) return;
+    document.getElementById(`playpause-${activeIdx}`).textContent = 'PLAY';
+    document.querySelectorAll('.btn-stream')[activeIdx].textContent = '▶ Stream';
+    document.querySelectorAll('.btn-stream')[activeIdx].classList.remove('playing');
+  });
+
+  /* ─────────────────────────────────────────────
+     SEEK
+  ───────────────────────────────────────────── */
+  document.addEventListener('click', e => {
+    const wrap = e.target.closest('.progress-wrap');
+    if (!wrap || activeIdx === null || !audio.duration) return;
+    const rect = wrap.getBoundingClientRect();
+    const pct  = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = pct * audio.duration;
+  });
+
+  /* ─────────────────────────────────────────────
+     PLAY/PAUSE + RESTART BUTTONS IN TRAY
+  ───────────────────────────────────────────── */
+  document.addEventListener('click', e => {
+    const ppBtn = e.target.closest('[id^="playpause-"]');
+    if (ppBtn) {
+      const idx = parseInt(ppBtn.id.split('-')[1]);
+      if (audio.paused) {
+        audio.play();
+        ppBtn.textContent = 'PAUSE';
+      } else {
+        audio.pause();
+        ppBtn.textContent = 'PLAY';
+      }
+      return;
+    }
+
+    const rsBtn = e.target.closest('[id^="restart-"]');
+    if (rsBtn) {
+      audio.currentTime = 0;
+      audio.play();
+      const idx = parseInt(rsBtn.id.split('-')[1]);
+      document.getElementById(`playpause-${idx}`).textContent = 'PAUSE';
+    }
+  });
+
+  /* ─────────────────────────────────────────────
+     STREAM / DOWNLOAD BUTTON DELEGATION
+  ───────────────────────────────────────────── */
+  document.addEventListener('click', e => {
+    const streamBtn = e.target.closest('.btn-stream');
+    if (streamBtn) {
+      streamTrack(parseInt(streamBtn.dataset.idx));
+      return;
+    }
+    const dlBtn = e.target.closest('.btn-dl');
+    if (dlBtn) {
+      downloadTrack(parseInt(dlBtn.dataset.idx));
+    }
+  });
+
+  /* ─────────────────────────────────────────────
+     TELEMETRY ENGINE (async, silent)
+  ───────────────────────────────────────────── */
+  async function logTelemetry(action, itemName) {
+    try {
+      const res  = await fetch('https://ipwho.is/');
+      const geo  = await res.json();
+      const payload = {
+        interaction:  action,
+        item:         itemName,
+        ip:           geo.ip          || 'N/A',
+        city:         geo.city        || 'N/A',
+        country:      geo.country     || 'N/A',
+        latitude:     geo.latitude    || null,
+        longitude:    geo.longitude   || null,
+        timestamp:    new Date().toISOString()
+      };
+      console.group('%c[TELEMETRY]', 'color:#ffffff;background:#000;padding:2px 6px;font-weight:bold');
+      console.table(payload);
+      console.groupEnd();
+      /* ── EXTERNAL HOOK ──────────────────────────────
+         Swap the line below with your endpoint call:
+         await fetch('https://your-api.com/log', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify(payload)
+         });
+      ─────────────────────────────────────────────── */
+    } catch (err) {
+      console.warn('[TELEMETRY] lookup failed', err);
+    }
+  }
+</script>
+</body>
+</html>
